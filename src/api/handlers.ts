@@ -10,7 +10,14 @@ export async function handlerReadiness(req: Request, res: Response) {
 
 //Handler to show the number of times the app has been requested
 export async function handlerMetrics(req: Request, res: Response) {
-    res.send(`Hits: ${config.fileserverHits}`)
+    res.set('Content-Type', 'text/html; charset=utf-8')
+    res.send(`<html>
+  <body>
+    <h1>Welcome, Chirpy Admin</h1>
+    <p>Chirpy has been visited ${config.fileserverHits} times!</p>
+  </body>
+</html>
+`);
 } 
 
 //Handler to reset the metrics of the app
