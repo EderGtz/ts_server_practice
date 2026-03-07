@@ -28,26 +28,20 @@ export async function handlerResetMetrics(req: Request, res: Response) {
     res.end()
 }
 
+interface params {
+  body: string
+}
+
 export async function handlerStringsLenghtChecker(req: Request, res: Response) {
-  let body = "";
 
-  req.on("data", (chunk) => {
-    body += chunk;
-  });
+  const params = req.body;
+  const maxChirpLength = 140;
 
-  let parsedInformation;
-  req.on("end", () => {
-    try {
-      parsedInformation = JSON.parse(body);
-    } catch (error) {
-      respondWithError(res, 400, "Something went wrong")
-      return
-    }
-
-    if (parsedInformation.body.length > 400) {
-      respondWithError(res, 400, "Chirp is too long")
-      return
-    };
-      respondWithJSON(res, 200, {valid: true});
+  if (params.body.length > maxChirpLength) {
+    respondWithError(res, 400, "Chirp is too long")
+    return;
+  }
+  respondWithJSON(res, 200, {
+    valid: true
   });
 };
