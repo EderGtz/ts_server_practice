@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 
 import {config} from "../config.js"
+import { respondWithError, respondWithJSON } from "./responses.js";
 
 //Handler used to give information about the state of the server
 export async function handlerReadiness(req: Request, res: Response) {
@@ -21,8 +22,32 @@ export async function handlerMetrics(req: Request, res: Response) {
 } 
 
 //Handler to reset the metrics of the app
-export async function handlerResetMetrics(req: Request, res: Response){
+export async function handlerResetMetrics(req: Request, res: Response) {
     config.fileserverHits = 0
     res.write("Hits reset to 0")
     res.end()
 }
+
+export async function handlerStringsLenghtChecker(req: Request, res: Response) {
+  let body = "";
+
+  req.on("data", (chunk) => {
+    body += chunk;
+  });
+
+  let parsedInformation;
+  req.on("end", () => {
+    try {
+      parsedInformation = JSON.parse(body);
+    } catch (error) {
+      respondWithError(res, 400, "Something went wrong")
+      return
+    }
+
+    if (parsedInformation.body.length > 400) {
+      respondWithError(res, 400, "Chirp is too long")
+      return
+    };
+      respondWithJSON(res, 200, {valid: true});
+  });
+};

@@ -16,14 +16,13 @@ export async function middlewareLogResponses(
     next();
 }
 
-//Middleware to register the time the time to resolve the petition
+//Middleware to register the time to resolve the petition
 export async function middlewareRequestTime(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
     const startTime = Date.now();
-
     res.on("finish", () => {
         const duration = Date.now() - startTime;
         console.log(`${req.method} ${req.url} - ${duration}ms`)
