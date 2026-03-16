@@ -2,13 +2,12 @@ import express from "express";
 import postgres from "postgres";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { config } from "../src/config"
+import { config } from "./config.js"
 import {
     handlerReadiness, 
     handlerMetrics,
-    handlerResetMetrics,
     handlerValidateChirp,
-    errorHandler
+    errorHandler,
     } from "./api/handlers.js";
 
 import {
@@ -16,6 +15,8 @@ import {
      middlewareRequestTime,
      middlewareMetricsInc
     } from "./api/middlewares.js"
+import { handlerReset } from "./api/resets.js";
+import { handlerCreateUser } from "./api/users.js";
 
 //Connects to db
 const migrationClient = postgres(config.db.dbConnectionUrl, { max: 1 });
@@ -48,13 +49,19 @@ app.get("/admin/metrics", (req, res, next) => {
 
 app.post("/admin/reset", (req, res, next) => { 
     Promise
-    .resolve(handlerResetMetrics(req, res))
+    .resolve(handlerReset(req, res))
     .catch(next);
 });
 
 app.post("/api/validate_chirp", (req, res, next) => { 
     Promise
     .resolve(handlerValidateChirp(req, res))
+    .catch(next);
+});
+
+app.post("/api/users", (req, res, next) => {
+    Promise
+    .resolve(handlerCreateUser(req, res))
     .catch(next);
 });
 

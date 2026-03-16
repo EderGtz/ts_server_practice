@@ -22,13 +22,6 @@ export async function handlerMetrics(req: Request, res: Response) {
 `);
 } 
 
-//Handler to reset the metrics of the app
-export async function handlerResetMetrics(req: Request, res: Response) {
-    config.api.fileserverHits = 0
-    res.write("Hits reset to 0")
-    res.end()
-}
-
 interface params {
   body: string
 }
