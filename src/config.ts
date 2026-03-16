@@ -1,9 +1,19 @@
-//Hold the numberof requests received by the app
-type APIConfig = {
-    fileserverHits: number;
-    dbURL: string;
+import type {MigrationConfig} from "drizzle-orm/migrator";
+
+type Config = {
+    api: APIConfig;
+    db: DBConfig;
 };
 
+type APIConfig = {
+    fileserverHits: number;
+    port: number;    
+};
+
+type DBConfig = {
+    dbConnectionUrl: string;
+    migrationConfig: MigrationConfig;
+};
 
 process.loadEnvFile();
 
@@ -13,8 +23,17 @@ function envOrThrow(key: string) {
     return value;
 };
 
-//Hold stateful data
-export const config: APIConfig = {
-    fileserverHits: 0,
-    dbURL: envOrThrow("DB_URL")
+const migrationConfig: MigrationConfig = {
+    migrationsFolder: "./src/db/migrations"
+};
+
+export const config: Config = {
+    api: {
+        fileserverHits: 0,
+        port: Number(envOrThrow("PORT"))
+    },
+    db: {
+        dbConnectionUrl: envOrThrow("DB_URL"),
+        migrationConfig: migrationConfig
+    }
 }

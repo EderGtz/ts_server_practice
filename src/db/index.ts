@@ -5,6 +5,6 @@ import * as schema from "./schema.js";
 import { config } from "../config.js";
 
 //Utility function to make queries to the server
-const conn = postgres(config.dbURL);
+const conn = postgres(config.db.dbConnectionUrl);
 
 export const db = drizzle(conn, { schema });
