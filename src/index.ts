@@ -16,7 +16,7 @@ import {
     } from "./api/middlewares.js"
 import { handlerReset } from "./api/resets.js";
 import { handlerCreateUser } from "./api/users.js";
-import { handlerCreateChirp } from "./api/chirps.js";
+import { handlerCreateChirp, handlerSelectChirps, handlerSelectSingleChirp } from "./api/chirps.js";
 
 //Connects to db
 const migrationClient = postgres(config.db.dbConnectionUrl, { max: 1 });
@@ -31,6 +31,11 @@ app.use(express.json())
 app.use(middlewareLogResponses);
 app.use(middlewareRequestTime);
 
+/**
+ * ----------------------
+ * POST METHOD
+ * ----------------------
+ */
 app.get("/", (req, res) => {
     res.redirect("/app/")
 });
@@ -47,6 +52,23 @@ app.get("/admin/metrics", (req, res, next) => {
     .catch(next);
 });
 
+app.get("/api/chirps", (req, res, next) => {
+    Promise
+    .resolve(handlerSelectChirps(req, res))
+    .catch(next);
+});
+
+app.get("/api/chirps/*chirpId", (req, res, next) => {
+    Promise
+    .resolve(handlerSelectSingleChirp(req, res, req.params.chirpId))
+    .catch(next);
+});
+
+/**
+ * ----------------------
+ * POST METHOD
+ * ----------------------
+ */
 app.post("/api/chirps", (req, res, next) => {
     Promise
     .resolve(handlerCreateChirp(req, res))

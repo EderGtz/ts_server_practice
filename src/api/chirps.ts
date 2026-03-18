@@ -1,9 +1,8 @@
 import type { Request, Response } from "express";
 
-import { BadRequestError } from "./types/class_errors.js";
-import { createChirp } from "../db/queries/chirps.js";
+import { BadRequestError, NotFoundError } from "./types/class_errors.js";
+import { createChirp, selectAllChirps, selectSingleChirp } from "../db/queries/chirps.js";
 import { respondWithJSON } from "./responses.js";
-
 
 interface params {
   body: string,
@@ -34,21 +33,15 @@ export async function handlerCreateChirp(req: Request, res: Response) {
   respondWithJSON(res, 201, payload)
 };
 
-async function validateChirp(chirpString: string) {
+const notAdmitedWords = ["kerfuffle", "sharbert", "fornax"]
 
+async function validateChirp(chirpString: string) {
   const maxChirpLength = 140;
   if (chirpString.length > maxChirpLength) {
     throw new BadRequestError("Chirp is too long. Max length is 140");
   }
-  const cleanedBodyText = badWordsDetector(chirpString)
 
-  return cleanedBodyText
-};
-
-const notAdmitedWords = ["kerfuffle", "sharbert", "fornax"]
-
-function badWordsDetector(body: string) {
-  const splittedBody = body.split(" ")
+  const splittedBody = chirpString.split(" ")
   let final = [];
   for (let word of splittedBody) {
     if (notAdmitedWords.includes(word.toLocaleLowerCase())) {
@@ -57,4 +50,18 @@ function badWordsDetector(body: string) {
     final.push(word)
   };
   return final.join(" ")
-}
+};
+
+export async function handlerSelectChirps(req: Request, res: Response) {
+  respondWithJSON(res, 200, await selectAllChirps())
+};
+
+export async function handlerSelectSingleChirp(req: Request, res: Response, chirpId: string[]) {
+
+  const chirp = await selectSingleChirp(chirpId[0])
+  if (!chirp) {
+    throw new NotFoundError(`Chirp with ID ${chirpId} not found`);
+  };
+
+  respondWithJSON(res, 200, chirp);
+};
