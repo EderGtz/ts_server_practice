@@ -2,3 +2,5 @@ node_modules/
 dist/
 *.log
 .env
+src/db/migrations/
+src/db/migrations/meta/
