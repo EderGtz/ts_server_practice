@@ -23,11 +23,10 @@ export async function handlerCreateUser(req: Request, res: Response) {
     };
 
     const payload = {
-
         id: userCreated.id,
         email: userCreated.email,
-        createdAt: userCreated.createdAt,
-        updatedAt: userCreated.updatedAt,
+        createdAt: userCreated.created_at,
+        updatedAt: userCreated.updated_at,
     }; 
     respondWithJSON(res, 201, payload)
 }

@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 
 import {config} from "../config.js"
-import { respondWithError, respondWithJSON } from "./responses.js";
+import { respondWithError } from "./responses.js";
 import { BadRequestError, NotFoundError, UserForbiddenError, UserNotAuthenticatedError } from "./types/class_errors.js";
 
 //Handler used to give information about the state of the server
@@ -21,40 +21,6 @@ export async function handlerMetrics(req: Request, res: Response) {
 </html>
 `);
 } 
-
-interface params {
-  body: string
-}
-
-export async function handlerValidateChirp(req: Request, res: Response) {
-
-  const params: params = req.body;
-  const textBody = params.body
-  const maxChirpLength = 140;
-
-  if (textBody.length > maxChirpLength) {
-    throw new BadRequestError("Chirp is too long. Max length is 140");
-  }
-  const cleanedBodyText = badWordsDetector(textBody)
-
-  respondWithJSON(res, 200, {
-    cleanedBody: cleanedBodyText
-  });
-};
-
-const notAdmitedWords = ["kerfuffle", "sharbert", "fornax"]
-
-function badWordsDetector(body: string) {
-  const splittedBody = body.split(" ")
-  let final = [];
-  for (let word of splittedBody) {
-    if (notAdmitedWords.includes(word.toLocaleLowerCase())) {
-      word = "****"
-    }; 
-    final.push(word)
-  };
-  return final.join(" ")
-}
 
 export async function errorHandler(
   err: Error,

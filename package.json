@@ -6,8 +6,8 @@
   "scripts": {
     "build": "npx tsc",
     "dev": "npx tsc && node dist/index.js",
-    "generate": "npx drizzle-kit generate",
-    "migrate": "npx drizzle-kit migrate"
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx drizzle-kit migrate"
   },
   "keywords": [],
   "author": "",
