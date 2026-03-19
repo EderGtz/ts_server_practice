@@ -8,15 +8,21 @@ import {
     handlerMetrics,
     errorHandler,
     } from "./api/handlers.js";
-
 import {
     middlewareLogResponses,
      middlewareRequestTime,
      middlewareMetricsInc
     } from "./api/middlewares.js"
 import { handlerReset } from "./api/resets.js";
-import { handlerCreateUser } from "./api/users.js";
-import { handlerCreateChirp, handlerSelectChirps, handlerSelectSingleChirp } from "./api/chirps.js";
+import { 
+    handlerCreateUser, 
+    handlerUserLogin 
+} from "./api/users.js";
+import { 
+    handlerCreateChirp, 
+    handlerSelectChirps, 
+    handlerSelectSingleChirp 
+} from "./api/chirps.js";
 
 //Connects to db
 const migrationClient = postgres(config.db.dbConnectionUrl, { max: 1 });
@@ -84,6 +90,12 @@ app.post("/admin/reset", (req, res, next) => {
 app.post("/api/users", (req, res, next) => {
     Promise
     .resolve(handlerCreateUser(req, res))
+    .catch(next);
+});
+
+app.post("/api/login/", (req, res, next) => {
+    Promise
+    .resolve(handlerUserLogin(req, res))
     .catch(next);
 });
 
