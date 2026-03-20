@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
 import { createUser, getUserByEmail } from "../db/queries/users.js";
-import { respondWithError, respondWithJSON } from "./responses.js";
+import { respondWithJSON } from "./responses.js";
 import { BadRequestError, UserNotAuthenticatedError } from "./types/class_errors.js";
 import { checkPasswordHash, hashPassword } from "../auth.js";
 import { NewUser } from "src/db/schema.js";
@@ -19,15 +19,15 @@ export async function handlerCreateUser(req: Request, res: Response) {
     };
 
     const hashedPassword = await hashPassword(parameters.password);
-
+    
     const userCreated = await createUser({
          email: parameters.email,
          hashed_password: hashedPassword
         } satisfies NewUser);
-    
+
     if (!userCreated) {
-        throw new Error("Could not create user");
-    };
+        throw new BadRequestError("Email already in use");
+    }
 
     const payload = {
         id: userCreated.id,

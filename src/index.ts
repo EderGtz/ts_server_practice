@@ -3,11 +3,7 @@ import postgres from "postgres";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { config } from "./config.js"
-import {
-    handlerReadiness, 
-    handlerMetrics,
-    errorHandler,
-    } from "./api/handlers.js";
+import { errorHandler } from "./api/error_handler.js";
 import {
     middlewareLogResponses,
      middlewareRequestTime,
@@ -23,6 +19,7 @@ import {
     handlerSelectChirps, 
     handlerSelectSingleChirp 
 } from "./api/chirps.js";
+import { handlerMetrics, handlerReadiness } from "./api/http_handlers.js";
 
 //Connects to db
 const migrationClient = postgres(config.db.dbConnectionUrl, { max: 1 });
