@@ -10,6 +10,6 @@
     "esModuleInterop": true, //use ES module syntax
     "skipLibCheck": true //skipes type checking all declaration files
   },
-  "include": ["./src/**/*.ts"], //files to include in comp
+  "include": ["./src/**/*.ts", "src/auth.test.ts"], //files to include in comp
   "exclude": ["node_modules"] //files to exclude from comp
 }

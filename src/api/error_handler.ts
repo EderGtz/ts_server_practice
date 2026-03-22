@@ -10,7 +10,6 @@ export async function errorHandler(
   __: NextFunction
 ) {
   console.log("Error type:", err.constructor.name);
-  console.log("Is BadRequestError?", err instanceof BadRequestError);
   let statusCode = 500;
   let errMessage = "Something went wrong on our end";
   console.log(err.message);
