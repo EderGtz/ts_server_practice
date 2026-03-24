@@ -16,8 +16,8 @@ import {
 } from "./api/users.js";
 import { 
     handlerCreateChirp, 
-    handlerSelectChirps, 
-    handlerSelectSingleChirp 
+    handlerGetChirps, 
+    handlerGetSingleChirp 
 } from "./api/chirps.js";
 import { handlerMetrics, handlerReadiness } from "./api/http_handlers.js";
 
@@ -57,13 +57,13 @@ app.get("/admin/metrics", (req, res, next) => {
 
 app.get("/api/chirps", (req, res, next) => {
     Promise
-    .resolve(handlerSelectChirps(req, res))
+    .resolve(handlerGetChirps(req, res))
     .catch(next);
 });
 
 app.get("/api/chirps/*chirpId", (req, res, next) => {
     Promise
-    .resolve(handlerSelectSingleChirp(req, res, req.params.chirpId))
+    .resolve(handlerGetSingleChirp(req, res, req.params.chirpId))
     .catch(next);
 });
 
@@ -78,12 +78,6 @@ app.post("/api/chirps", (req, res, next) => {
     .catch(next);
 });
 
-app.post("/admin/reset", (req, res, next) => { 
-    Promise
-    .resolve(handlerReset(req, res))
-    .catch(next);
-});
-
 app.post("/api/users", (req, res, next) => {
     Promise
     .resolve(handlerCreateUser(req, res))
@@ -93,6 +87,12 @@ app.post("/api/users", (req, res, next) => {
 app.post("/api/login/", (req, res, next) => {
     Promise
     .resolve(handlerUserLogin(req, res))
+    .catch(next);
+});
+
+app.post("/admin/reset", (req, res, next) => { 
+    Promise
+    .resolve(handlerReset(req, res))
     .catch(next);
 });
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { checkPasswordHash, hashPassword, makeJWT, MakeJWTPayload, validateJWT } from "./auth";
-import { UserNotAuthenticatedError } from "./api/types/class_errors";
+import { checkPasswordHash, extractBearerToken, hashPassword, makeJWT, MakeJWTPayload, validateJWT } from "./auth";
+import { BadRequestError, UserNotAuthenticatedError } from "./api/types/class_errors";
+import {NextFunction, Request, Response } from "express";
 
 describe("Password Hashing", () => {
   const password1 = "correctPassword123!";
@@ -70,6 +71,36 @@ describe("JWT Generation and Verification", () => {
     expect(() => validateJWT(validJwtToken, "wrong_secret")).toThrow(
       UserNotAuthenticatedError,
     );
+  });
+
+});
+
+describe("Extract bearer token from headers", () => {
+  it("Should extract the token from a valid header", () => {
+    const token = "secretToken";
+    const header = `Bearer ${token}`;
+    expect(extractBearerToken(header)).toBe(token);
+  });
+
+  it("should extract the token even if there are extra parts", () => {
+    const token = "mySecretToken";
+    const header = `Bearer ${token} extra-data`;
+    expect(extractBearerToken(header)).toBe(token);
+  });
+
+  it("should throw a BadRequestError if the header does not contain at least two parts", () => {
+    const header = "Bearer";
+    expect(() => extractBearerToken(header)).toThrow(BadRequestError);
+  });
+
+  it('should throw a BadRequestError if the header does not start with "Bearer"', () => {
+    const header = "Basic mySecretToken";
+    expect(() => extractBearerToken(header)).toThrow(BadRequestError);
+  });
+
+  it("should throw a BadRequestError if the header is an empty string", () => {
+    const header = "";
+    expect(() => extractBearerToken(header)).toThrow(BadRequestError);
   });
 
 });

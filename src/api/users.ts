@@ -3,9 +3,14 @@ import type { Request, Response } from "express";
 import { createUser, getUserByEmail } from "../db/queries/users.js";
 import { respondWithJSON } from "./responses.js";
 import { BadRequestError, UserNotAuthenticatedError } from "./types/class_errors.js";
-import { checkPasswordHash, hashPassword } from "../auth.js";
-import { NewUser } from "src/db/schema.js";
-
+import { NewUser } from "../db/schema.js";
+import { 
+    checkPasswordHash, 
+    hashPassword, 
+    makeJWT,
+    MakeJWTPayload
+} from "../auth.js";
+import { config } from "../config.js";
 
 export async function handlerCreateUser(req: Request, res: Response) {
     type createUserParams = {
@@ -42,16 +47,20 @@ export async function handlerUserLogin(req: Request, res: Response) {
     type loginUserParams = {
         password: string;
         email: string;
+        expiresInSeconds?: number;
     };
     const parameters: loginUserParams = req.body;
-
-    if (!parameters.password || !parameters.email) {
-        throw new BadRequestError("Missing required fields");
-    }
-
+    
     const userFromDb = await getUserByEmail(parameters.email);
     if (!userFromDb) {
         throw new UserNotAuthenticatedError("incorrect email or password");
+    }
+    let duration = config.jwt.defaultDuration;
+    if (parameters.expiresInSeconds && parameters.expiresInSeconds < duration) {
+        duration = parameters.expiresInSeconds;
+    };
+    if (!parameters.password || !parameters.email) {
+        throw new BadRequestError("Missing required fields");
     }
 
     const passwordVerified = await checkPasswordHash(
@@ -61,11 +70,20 @@ export async function handlerUserLogin(req: Request, res: Response) {
     if (!passwordVerified) {
         throw new UserNotAuthenticatedError("incorrect email or password");
     }
+
+    const jwtPayload: MakeJWTPayload = {
+        userId: userFromDb.id,
+        expiresInSeconds: duration,
+        secretKey: config.jwt.secret
+    };
+    const jwtToken = makeJWT(jwtPayload);
+
     const payload = {
         id: userFromDb!.id,
         email: userFromDb!.email,
         createdAt: userFromDb!.created_at,
         updatedAt: userFromDb!.updated_at,
+        token: jwtToken
     }; 
-    respondWithJSON(res, 200, payload)
+    respondWithJSON(res, 200, payload);
 }

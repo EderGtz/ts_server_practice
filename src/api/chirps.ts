@@ -1,23 +1,29 @@
 import type { Request, Response } from "express";
 
 import { BadRequestError, NotFoundError } from "./types/class_errors.js";
-import { createChirp, selectAllChirps, selectSingleChirp } from "../db/queries/chirps.js";
+import { createChirp, getAllChirps, getSingleChirp } from "../db/queries/chirps.js";
 import { respondWithJSON } from "./responses.js";
+import { getBearerToken, validateJWT } from "../auth.js";
+import { config } from "../config.js";
 
 interface params {
-  body: string,
-  userId: string
+  body: string;
 }
 
 export async function handlerCreateChirp(req: Request, res: Response) {
   const parameters: params = req.body
-  if (!parameters.body || !parameters.userId) {
+  if (!parameters.body) {
     throw new BadRequestError("Missing requiered fields");
   };
+  const bearerToken = getBearerToken(req);
+  const userId = validateJWT(bearerToken, config.jwt.secret);
 
   const chirp = parameters.body;
   const validChirp = await validateChirp(chirp);
-  const chirpCreated = await createChirp( {body: validChirp, user_id: parameters.userId} );
+  const chirpCreated = await createChirp({
+    body: validChirp, 
+    user_id: userId
+  });
 
   if (!chirpCreated) {
     throw new Error("Could not create chirp");
@@ -52,13 +58,13 @@ async function validateChirp(chirpString: string) {
   return final.join(" ")
 };
 
-export async function handlerSelectChirps(req: Request, res: Response) {
-  respondWithJSON(res, 200, await selectAllChirps())
+export async function handlerGetChirps(req: Request, res: Response) {
+  respondWithJSON(res, 200, await getAllChirps())
 };
 
-export async function handlerSelectSingleChirp(req: Request, res: Response, chirpId: string[]) {
+export async function handlerGetSingleChirp(req: Request, res: Response, chirpId: string[]) {
 
-  const chirp = await selectSingleChirp(chirpId[0])
+  const chirp = await getSingleChirp(chirpId[0])
   if (!chirp) {
     throw new NotFoundError(`Chirp with ID ${chirpId} not found`);
   };
