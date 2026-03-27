@@ -1,10 +1,12 @@
 import type { Request, Response } from "express";
 
-import { BadRequestError, NotFoundError } from "./types/class_errors.js";
+import { BadRequestError, InternalServerError, NotFoundError } from "./types/class_errors.js";
 import { createChirp, getAllChirps, getSingleChirp } from "../db/queries/chirps.js";
-import { respondWithJSON } from "./responses.js";
-import { getBearerToken, validateJWT } from "../auth.js";
-import { config } from "../config.js";
+import { 
+  getAuthenticatedUserId, 
+  respondWithJSON, 
+  validateRequiredFields 
+} from "../utils.js";
 
 interface params {
   body: string;
@@ -12,36 +14,33 @@ interface params {
 
 export async function handlerCreateChirp(req: Request, res: Response) {
   const parameters: params = req.body
-  if (!parameters.body) {
-    throw new BadRequestError("Missing requiered fields");
-  };
-  const bearerToken = getBearerToken(req);
-  const userId = validateJWT(bearerToken, config.jwt.secret);
+  validateRequiredFields({ body: parameters.body });
+  const userId = getAuthenticatedUserId(req);
 
   const chirp = parameters.body;
-  const validChirp = await validateChirp(chirp);
+  const validChirp = validateChirp(chirp);
   const chirpCreated = await createChirp({
     body: validChirp, 
     user_id: userId
   });
 
   if (!chirpCreated) {
-    throw new Error("Could not create chirp");
+    throw new InternalServerError("Could not create chirp");
   };
 
   const payload = {
     id: chirpCreated.id,
     body: chirpCreated.body,
     userId: chirpCreated.user_id,
-    createdAt: chirpCreated.created_at,
-    updatedAt: chirpCreated.updated_at
+    createdAt: chirpCreated.createdAt,
+    updatedAt: chirpCreated.updatedAt
   }
   respondWithJSON(res, 201, payload)
 };
 
 const notAdmitedWords = ["kerfuffle", "sharbert", "fornax"]
 
-async function validateChirp(chirpString: string) {
+function validateChirp(chirpString: string) {
   const maxChirpLength = 140;
   if (chirpString.length > maxChirpLength) {
     throw new BadRequestError("Chirp is too long. Max length is 140");
