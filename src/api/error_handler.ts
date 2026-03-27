@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response } from "express";
 
-import { respondWithError } from "./responses.js";
-import { BadRequestError, NotFoundError, UserForbiddenError, UserNotAuthenticatedError } from "./types/class_errors.js";
+import { respondWithError } from "../utils.js";
+import { AppError } from "./types/class_errors.js";
 
 export async function errorHandler(
   err: Error,
@@ -10,23 +10,12 @@ export async function errorHandler(
   __: NextFunction
 ) {
   console.log("Error type:", err.constructor.name);
-  let statusCode = 500;
-  let errMessage = "Something went wrong on our end";
   console.log(err.message);
 
-  if (err instanceof BadRequestError) {
-    statusCode = 400;
-    errMessage = err.message;
-  } else if (err instanceof UserNotAuthenticatedError) {
-    statusCode = 401;
-    errMessage = err.message;
-  } else if (err instanceof UserForbiddenError) {
-    statusCode = 403;
-    errMessage = err.message;
-  } else if (err instanceof NotFoundError) {
-    statusCode = 404
-    errMessage = err.message;
-  };
+  const statusCode = err instanceof AppError ? err.statusCode : 500;
+  const errMessage = err instanceof AppError 
+  ? err.message 
+  : "Something went wrong on our end"
   
   respondWithError(res, statusCode, errMessage)
 };

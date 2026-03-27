@@ -1,4 +1,5 @@
 import express from "express";
+import type { Request, Response } from "express";
 import postgres from "postgres";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -11,7 +12,7 @@ import {
     } from "./api/middlewares.js"
 import { handlerReset } from "./api/resets.js";
 import { 
-    handlerCreateUser, 
+    handlerUsersCreate, 
     handlerUserLogin 
 } from "./api/users.js";
 import { 
@@ -20,6 +21,7 @@ import {
     handlerGetSingleChirp 
 } from "./api/chirps.js";
 import { handlerMetrics, handlerReadiness } from "./api/http_handlers.js";
+import { handlerRefreshToken, handlerRevokeRefreshToken } from "./api/refresh_token.js";
 
 //Connects to db
 const migrationClient = postgres(config.db.dbConnectionUrl, { max: 1 });
@@ -39,23 +41,23 @@ app.use(middlewareRequestTime);
  * POST METHOD
  * ----------------------
  */
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
     res.redirect("/app/")
 });
 
-app.get("/admin/healthz", (req, res, next) => {
+app.get("/admin/healthz", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerReadiness(req, res))
     .catch(next);
 });
 
-app.get("/admin/metrics", (req, res, next) => { 
+app.get("/admin/metrics", (req: Request, res: Response, next) => { 
     Promise
     .resolve(handlerMetrics(req, res))
     .catch(next);
 });
 
-app.get("/api/chirps", (req, res, next) => {
+app.get("/api/chirps", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerGetChirps(req, res))
     .catch(next);
@@ -72,28 +74,40 @@ app.get("/api/chirps/*chirpId", (req, res, next) => {
  * POST METHOD
  * ----------------------
  */
-app.post("/api/chirps", (req, res, next) => {
+app.post("/admin/reset", (req: Request, res: Response, next) => { 
+    Promise
+    .resolve(handlerReset(req, res))
+    .catch(next);
+});
+
+app.post("/api/chirps", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerCreateChirp(req, res))
     .catch(next);
 });
 
-app.post("/api/users", (req, res, next) => {
+app.post("/api/users", (req: Request, res: Response, next) => {
     Promise
-    .resolve(handlerCreateUser(req, res))
+    .resolve(handlerUsersCreate(req, res))
     .catch(next);
 });
 
-app.post("/api/login/", (req, res, next) => {
+app.post("/api/login", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerUserLogin(req, res))
     .catch(next);
 });
 
-app.post("/admin/reset", (req, res, next) => { 
+app.post("/api/refresh", (req: Request, res: Response, next) => {
     Promise
-    .resolve(handlerReset(req, res))
+    .resolve(handlerRefreshToken(req, res))
     .catch(next);
+});
+
+app.post("/api/revoke", (req: Request, res: Response, next) => {
+    Promise
+    .resolve(handlerRevokeRefreshToken(req, res))
+    .catch(next)
 });
 
 app.use(errorHandler)

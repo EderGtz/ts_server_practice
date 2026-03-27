@@ -1,8 +1,8 @@
-import { Request } from "express";
 import { hash, verify } from "argon2";
 import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
-import { BadRequestError, UserNotAuthenticatedError } from "./api/types/class_errors.js";
+import { UserNotAuthenticatedError } from "./api/types/class_errors.js";
+import { randomBytes } from "node:crypto";
 
 const TOKEN_ISSUER = "chirpy";
 type Payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
@@ -67,22 +67,8 @@ export function validateJWT(
 }
 
 /**
- * Verify auth information coming in the header, like this
- * 
- * Bearer TOKEN_STRING
+ * Generate a random 256-bit (32-byte) hex-encoded string
  */
-export function getBearerToken(req: Request): string {
-    const tokenHeader = req.get("Authorization");
-    if (!tokenHeader) {
-        throw new BadRequestError("Malformed authorization header");
-    };
-    return extractBearerToken(tokenHeader);
-};
-
-export function extractBearerToken(header: string) {
-    const splitHeader = header.split(" ");
-    if (splitHeader.length < 2 || splitHeader[0] !== "Bearer") {
-        throw new BadRequestError("Malforme authorization header");
-    };
-    return splitHeader[1];
+export function makeRefreshToken(): string {
+    return randomBytes(32).toString('hex')
 };
