@@ -12,7 +12,7 @@ export async function createChirp(chirp: NewChirp) {
 };
 
 export async function getAllChirps() {
-  return await db.select().from(chirps).orderBy(asc(chirps.created_at));
+  return await db.select().from(chirps).orderBy(asc(chirps.createdAt));
 }
 
 export async function deleteAllChirps() {

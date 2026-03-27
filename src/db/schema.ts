@@ -2,21 +2,21 @@ import { pgTable, timestamp, varchar, uuid } from "drizzle-orm/pg-core"
 
 export const users = pgTable("users", {
     id: uuid("id").primaryKey().defaultRandom(),
-    created_at: timestamp("created_at").notNull().defaultNow(),
-    updated_at: timestamp("updated_at")
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
     email: varchar("email", { length: 256 }).unique().notNull(),
-    hashed_password: varchar("hashed_password", { length: 256 })
+    hashedPassword: varchar("hashed_password", { length: 256 })
     .notNull()
     .default("unset")
 });
 
 export const chirps = pgTable("chirps", {
     id: uuid("id").primaryKey().defaultRandom(),
-    created_at: timestamp("created_at").notNull().defaultNow(),
-    updated_at: timestamp("updated_at")
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
@@ -24,10 +24,26 @@ export const chirps = pgTable("chirps", {
     user_id: uuid("user_id").references(() => users.id, { onDelete: "cascade" })
 });
 
+export const refreshTokens = pgTable("refresh_tokens", {
+  token: varchar("token", { length: 256 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  revokedAt: timestamp("revoked_at"),
+});
+
 // Shape for **writing** to the db
 export type NewUser = typeof users.$inferInsert;
 export type NewChirp = typeof chirps.$inferInsert;
+export type NewRefreshToken = typeof refreshTokens.$inferInsert;
 
-// Shape for **reading** from db
-//export type UserCreated = typeof users.$inferSelect;
-//export type ChirpCreated = typeof chirps.$inferSelect;
+//Shape for reading to the db
+export type UserCreated = typeof users.$inferSelect;
+export type ChirpCreated = typeof chirps.$inferSelect;
+export type RefreshTokenCreated = typeof refreshTokens.$inferSelect;

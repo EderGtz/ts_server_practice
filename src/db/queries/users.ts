@@ -1,5 +1,5 @@
 import { db } from "../index.js";
-import { NewUser, users } from "../schema.js";
+import { NewUser, UserCreated, users } from "../schema.js";
 import { eq } from "drizzle-orm";
 
 export async function createUser(user: NewUser) {
@@ -8,7 +8,7 @@ export async function createUser(user: NewUser) {
     .values(user)
     .onConflictDoNothing()
     .returning();
-  return result;
+  return result satisfies UserCreated;
 };
 
 export async function deleteAllUsers() {
