@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { checkPasswordHash, extractBearerToken, hashPassword, makeJWT, MakeJWTPayload, validateJWT } from "./auth";
+import { checkPasswordHash, hashPassword, makeJWT, MakeJWTPayload, validateJWT } from "./auth";
 import { BadRequestError, UserNotAuthenticatedError } from "./api/types/class_errors";
-import {NextFunction, Request, Response } from "express";
+import { extractBearerToken } from "./utils";
 
 describe("Password Hashing", () => {
   const password1 = "correctPassword123!";
@@ -12,7 +12,7 @@ describe("Password Hashing", () => {
   beforeAll(async () => {
     hash1 = await hashPassword(password1);
     hash2 = await hashPassword(password2);
-  });
+  }); 
 
   it("should return true for the correct password", async () => {
     const result = await checkPasswordHash(password1, hash1);
