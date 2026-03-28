@@ -1,0 +1,65 @@
+### Global variables
+@baseUrl = http://localhost:8080
+@email = saul@bettercall.com
+@password = 123456
+
+### =========================================
+### ADMIN
+### =========================================
+
+### Health
+GET {{baseUrl}}/admin/healthz
+
+### Reset all stored values in db
+POST {{baseUrl}}/admin/reset
+
+### Metrics
+GET {{baseUrl}}/admin/metrics
+
+### =========================================
+### USER MANAGEMENT
+### =========================================
+
+### Create a new user
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Login as user to get jwt
+# @name login
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Revoke users refresh token
+POST {{baseUrl}}/api/revoke
+Authorization: Bearer {{login.response.body.refreshToken}}
+
+
+### =========================================
+### CHIRPS MANAGEMENT
+### =========================================
+
+### Create a new chirp
+# @name createChirp
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: application/json
+
+{
+  "body": "No more half-measures."
+}
+
+### Get all chirps
+GET {{baseUrl}}/api/chirps
+
+### Get single chirp
+GET {{baseUrl}}/api/chirps/{{createChirp.response.body.id}}

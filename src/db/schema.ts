@@ -25,7 +25,7 @@ export const chirps = pgTable("chirps", {
 });
 
 export const refreshTokens = pgTable("refresh_tokens", {
-  token: varchar("token", { length: 256 }),
+  token: varchar("token", { length: 256 }).primaryKey(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()

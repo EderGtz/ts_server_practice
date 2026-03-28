@@ -32,9 +32,9 @@ const app = express();
 const PORT = 8080;
 
 app.use("/app",  middlewareMetricsInc, express.static("./src/app"));
-app.use(express.json())
 app.use(middlewareLogResponses);
 app.use(middlewareRequestTime);
+app.use(express.json());
 
 /**
  * ----------------------
