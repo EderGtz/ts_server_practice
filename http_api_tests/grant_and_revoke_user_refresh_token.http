@@ -1,0 +1,57 @@
+### Reset all stored values in db
+POST {{baseUrl}}/admin/reset
+
+### Create a new user
+POST {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Login as user to get jwt
+# @name login
+POST {{baseUrl}}/api/login
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Try to post a new chirp using the bad token
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{login.response.body.refreshToken}}
+
+{
+  "body": "Let’s just say I know a guy... who knows a guy... who knows another guy."
+}
+
+### Post a new chirp with the correct token
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "body": "Let’s just say I know a guy... who knows a guy... who knows another guy."
+}
+
+### Refresh the access token using the refresh token given before
+# @name refresh
+POST {{baseUrl}}/api/refresh
+Authorization: Bearer {{login.response.body.refreshToken}}
+
+### Post a new chirp using the new access token
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{refresh.response.body.token}}
+
+{
+  "body": "I'm the guy who's gonna win you this case."
+}
+
+### Revoke the refresh token
+# If the current access token expire, user will not be able to post a chirp
+POST {{baseUrl}}/api/revoke
+Authorization: Bearer {{login.response.body.refreshToken}}
+
+### Try to refresh the access token
+POST {{baseUrl}}/api/refresh
+Authorization: Bearer {{login.response.body.refreshToken}}

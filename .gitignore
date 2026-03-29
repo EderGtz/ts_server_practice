@@ -4,3 +4,9 @@ dist/
 .env
 src/db/migrations/
 src/db/migrations/meta/
+
+# IDE - VS Code
+.vscode/
+
+# REST Client environments (por si no lo habías puesto)
+http-client.env.json

@@ -1,0 +1,45 @@
+### Reset all stored values in db
+POST {{baseUrl}}/admin/reset
+
+### Create a new user
+POST {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Login as user to get jwt
+# @name login
+POST {{baseUrl}}/api/login
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Updating user with new email and password
+PUT {{baseUrl}}/api/users
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "email": "{{emailExample2}}",
+  "password": "{{passwordExample2}}"
+}
+
+### Request without authorization header
+PUT {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample2}}",
+  "password": "{{passwordExample2}}"
+}
+
+### Request with a bad auth header
+PUT {{baseUrl}}/api/users
+Authorization: Bearer breakingToken
+
+{
+  "email": "{{emailExample2}}",
+  "password": "{{passwordExample2}}"
+}
