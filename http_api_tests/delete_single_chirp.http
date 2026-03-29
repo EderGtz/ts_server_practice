@@ -1,0 +1,62 @@
+### Reset all stored values in db
+POST {{baseUrl}}/admin/reset
+
+### Create a new user
+POST {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Login as user to get jwt
+# @name login
+POST {{baseUrl}}/api/login
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Creating another user
+POST {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample2}}",
+  "password": "{{passwordExample2}}"
+}
+
+### Login as user to get jwt
+# @name loginUser2
+POST {{baseUrl}}/api/login
+
+{
+  "email": "{{emailExample2}}",
+  "password": "{{passwordExample2}}"
+}
+
+### Post a new chirp with the correct token
+# @name chirp
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "body": "I did it for me. I liked it. I was good at it. And I was really... I was alive."
+}
+
+### Getting the chirp just created
+GET {{baseUrl}}/api/chirps/{{chirp.response.body.id}}
+
+### Trying to delete the chirp without auth header
+DELETE {{baseUrl}}/api/chirps/{{chirp.response.body.id}}
+
+### Trying to delete the chirp with a user different that the creator
+DELETE {{baseUrl}}/api/chirps/{{chirp.response.body.id}}
+Authorization: Bearer {{loginUser2.response.body.token}}
+
+### Deleting the chirp with success
+DELETE {{baseUrl}}/api/chirps/{{chirp.response.body.id}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Trying to get the chirp again
+GET {{baseUrl}}/api/chirps/{{chirp.response.body.id}}

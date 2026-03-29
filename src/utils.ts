@@ -58,3 +58,22 @@ export function ensureResourceCreated<T>(
 
     return resource;
 }
+
+const notAdmitedWords = ["kerfuffle", "sharbert", "fornax"]
+
+export function validateChirp(chirpString: string) {
+  const maxChirpLength = 140;
+  if (chirpString.length > maxChirpLength) {
+    throw new BadRequestError("Chirp is too long. Max length is 140");
+  }
+
+  const splittedBody = chirpString.split(" ")
+  let final = [];
+  for (let word of splittedBody) {
+    if (notAdmitedWords.includes(word.toLocaleLowerCase())) {
+      word = "****"
+    }; 
+    final.push(word)
+  };
+  return final.join(" ")
+};

@@ -13,15 +13,19 @@ export async function createChirp(chirp: NewChirp) {
 
 export async function getAllChirps() {
   return await db.select().from(chirps).orderBy(asc(chirps.createdAt));
-}
-
-export async function deleteAllChirps() {
-    await db.delete(chirps);
-}
+};
 
 export async function getSingleChirp(chirpId: string) {
   const rows =  await db.select().from(chirps).where(eq(chirps.id, chirpId));
 
   if (rows.length === 0) return
   return rows[0]
+};
+
+export async function deleteAllChirps() {
+    await db.delete(chirps);
+};
+
+export async function deleteSingleChirp(chirpId: string) {
+  await db.delete(chirps).where(eq(chirps.id, chirpId))
 };

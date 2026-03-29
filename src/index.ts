@@ -18,6 +18,7 @@ import {
 } from "./api/users.js";
 import { 
     handlerCreateChirp, 
+    handlerDeleteChirp, 
     handlerGetChirps, 
     handlerGetSingleChirp 
 } from "./api/chirps.js";
@@ -85,6 +86,12 @@ app.get("/api/chirps/*chirpId", (req, res, next) => {
 app.post("/api/chirps", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerCreateChirp(req, res))
+    .catch(next);
+});
+
+app.delete("/api/chirps/:chirpId", (req: Request, res: Response, next) => {
+    Promise
+    .resolve(handlerDeleteChirp(req, res))
     .catch(next);
 });
 
