@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 
-import { BadRequestError, InternalServerError } from "./api/types/class_errors.js";
+import { BadRequestError, InternalServerError, UserNotAuthenticatedError } from "./api/types/class_errors.js";
 import { validateJWT } from "./auth.js";
 import { config } from "./config.js";
 
@@ -22,7 +22,7 @@ export async function respondWithJSON(res: Response, code: number, payload?: any
 export function getBearerToken(req: Request): string {
     const tokenHeader = req.get("Authorization");
     if (!tokenHeader) {
-        throw new BadRequestError("Malformed authorization header");
+        throw new UserNotAuthenticatedError("Malformed authorization header");
     };
     return extractBearerToken(tokenHeader);
 };
@@ -30,7 +30,7 @@ export function getBearerToken(req: Request): string {
 export function extractBearerToken(header: string) {
     const splitHeader = header.split(" ");
     if (splitHeader.length < 2 || splitHeader[0] !== "Bearer") {
-        throw new BadRequestError("Malformed authorization header");
+        throw new UserNotAuthenticatedError("Malformed authorization header");
     };
     return splitHeader[1];
 };

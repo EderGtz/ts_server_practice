@@ -13,7 +13,8 @@ import {
 import { handlerReset } from "./api/resets.js";
 import { 
     handlerUsersCreate, 
-    handlerUserLogin 
+    handlerUserLogin, 
+    handlerUserUpdate
 } from "./api/users.js";
 import { 
     handlerCreateChirp, 
@@ -38,7 +39,7 @@ app.use(express.json());
 
 /**
  * ----------------------
- * POST METHOD
+ * ADMIN METHODS
  * ----------------------
  */
 app.get("/", (req: Request, res: Response) => {
@@ -57,6 +58,18 @@ app.get("/admin/metrics", (req: Request, res: Response, next) => {
     .catch(next);
 });
 
+app.post("/admin/reset", (req: Request, res: Response, next) => { 
+    Promise
+    .resolve(handlerReset(req, res))
+    .catch(next);
+});
+
+/**
+ * ----------------------
+ * CHIRPS METHODS
+ * ----------------------
+ */
+
 app.get("/api/chirps", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerGetChirps(req, res))
@@ -69,28 +82,35 @@ app.get("/api/chirps/*chirpId", (req, res, next) => {
     .catch(next);
 });
 
-/**
- * ----------------------
- * POST METHOD
- * ----------------------
- */
-app.post("/admin/reset", (req: Request, res: Response, next) => { 
-    Promise
-    .resolve(handlerReset(req, res))
-    .catch(next);
-});
-
 app.post("/api/chirps", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerCreateChirp(req, res))
     .catch(next);
 });
 
+/**
+ * ----------------------
+ * USERS METHODS
+ * ----------------------
+ */
+
 app.post("/api/users", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerUsersCreate(req, res))
     .catch(next);
 });
+
+app.put("/api/users", (req: Request, res: Response, next) => {
+    Promise 
+    .resolve(handlerUserUpdate(req, res))
+    .catch(next);
+});
+
+/**
+ * ----------------------
+ * CREDENTIALS METHODS
+ * ----------------------
+ */
 
 app.post("/api/login", (req: Request, res: Response, next) => {
     Promise
@@ -111,7 +131,6 @@ app.post("/api/revoke", (req: Request, res: Response, next) => {
 });
 
 app.use(errorHandler)
-
 app.listen(config.api.port, () => { //Starts server and listen for connections on the port
     console.log(`Server is running at http://localhost:${config.api.port}`);
 });

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
-import { createUser, getUserByEmail } from "../db/queries/users.js";
-import { ensureResourceCreated, respondWithJSON, validateRequiredFields } from "../utils.js";
+import { createUser, editUserByEmail, getUserByEmail } from "../db/queries/users.js";
+import { ensureResourceCreated, getAuthenticatedUserId, respondWithError, respondWithJSON, validateRequiredFields } from "../utils.js";
 import { BadRequestError, UserNotAuthenticatedError } from "./types/class_errors.js";
 import { NewUser, UserCreated } from "../db/schema.js";
 import { 
@@ -15,6 +15,10 @@ import { config } from "../config.js";
 import { saveRefreshToken } from "../db/queries/tokens.js";
 
 export type UserResponse = Omit<UserCreated, "hashedPassword">;
+type userRequest = {
+        password: string;
+        email: string;
+    };
 
 export async function handlerUsersCreate(req: Request, res: Response) {
     type createUserParams = {
@@ -45,17 +49,14 @@ export async function handlerUsersCreate(req: Request, res: Response) {
 }
 
 export async function handlerUserLogin(req: Request, res: Response) {
-    type loginUserParams = {
-        password: string;
-        email: string;
-    };
-    const parameters: loginUserParams = req.body;
+
+    const parameters: userRequest = req.body;
     validateRequiredFields(parameters)
 
     const userFromDb = await getUserByEmail(parameters.email);
     if (!userFromDb) {
         throw new UserNotAuthenticatedError("incorrect email or password");
-    }    
+    }
 
     const passwordVerified = await checkPasswordHash(
         parameters.password, 
@@ -73,7 +74,7 @@ export async function handlerUserLogin(req: Request, res: Response) {
     const jwtToken = makeJWT(jwtPayload);
 
     const randomBufToken = makeRefreshToken();
-    const refreshToken = ensureResourceCreated (await saveRefreshToken({
+    const refreshToken = ensureResourceCreated( await saveRefreshToken({
         token: randomBufToken,
         userId: userFromDb.id,
         expiresAt: config.jwt.defaultDurationRefreshToken,
@@ -90,3 +91,22 @@ export async function handlerUserLogin(req: Request, res: Response) {
     }; 
     respondWithJSON(res, 200, payload);
 }
+
+export async function handlerUserUpdate(req: Request, res: Response) {
+    const parameters: userRequest = req.body;
+    validateRequiredFields(parameters);
+
+    const userId = getAuthenticatedUserId(req);
+    const hashedPassword = await hashPassword(parameters.password);
+
+    const userUpdated = await editUserByEmail(userId, hashedPassword, parameters.email);
+
+    const payload = {
+        id: userUpdated.id,
+        email: userUpdated.email,
+        createdAt: userUpdated.createdAt,
+        updatedAt: userUpdated.updatedAt,
+    } satisfies UserResponse; 
+
+    respondWithJSON(res, 200, payload)
+};
