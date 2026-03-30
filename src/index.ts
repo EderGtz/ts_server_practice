@@ -14,16 +14,23 @@ import { handlerReset } from "./api/resets.js";
 import { 
     handlerUsersCreate, 
     handlerUserLogin, 
-    handlerUserUpdate
+    handlerUserUpdate,
+    handlerMakeUserChirpyRed
 } from "./api/users.js";
 import { 
     handlerCreateChirp, 
     handlerDeleteChirp, 
     handlerGetChirps, 
-    handlerGetSingleChirp 
+    handlerGetSingleChirp, 
 } from "./api/chirps.js";
-import { handlerMetrics, handlerReadiness } from "./api/http_handlers.js";
-import { handlerRefreshToken, handlerRevokeRefreshToken } from "./api/refresh_token.js";
+import { 
+    handlerMetrics, 
+    handlerReadiness 
+} from "./api/http_handlers.js";
+import { 
+    handlerRefreshToken, 
+    handlerRevokeRefreshToken 
+} from "./api/refresh_token.js";
 
 //Connects to db
 const migrationClient = postgres(config.db.dbConnectionUrl, { max: 1 });
@@ -104,6 +111,12 @@ app.delete("/api/chirps/:chirpId", (req: Request, res: Response, next) => {
 app.post("/api/users", (req: Request, res: Response, next) => {
     Promise
     .resolve(handlerUsersCreate(req, res))
+    .catch(next);
+});
+
+app.post("/api/polka/webhooks", (req: Request, res: Response, next) => {
+    Promise
+    .resolve(handlerMakeUserChirpyRed(req, res))
     .catch(next);
 });
 

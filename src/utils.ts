@@ -44,7 +44,7 @@ export function validateRequiredFields(fields: Record<string, unknown>) {
         (value) => value === undefined || value === null
     );
     if (hasMissingField) {
-        throw new BadRequestError("Missing requiered fields");
+        throw new BadRequestError("Missing required fields");
     };
 };
 

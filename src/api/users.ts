@@ -1,9 +1,25 @@
-import type { Request, Response } from "express";
+import { Request, Response } from "express";
 
-import { createUser, editUserByEmail, getUserByEmail } from "../db/queries/users.js";
-import { ensureResourceCreated, getAuthenticatedUserId, respondWithError, respondWithJSON, validateRequiredFields } from "../utils.js";
-import { BadRequestError, UserNotAuthenticatedError } from "./types/class_errors.js";
 import { NewUser, UserCreated } from "../db/schema.js";
+import { config } from "../config.js";
+import { saveRefreshToken } from "../db/queries/tokens.js";
+import { 
+    createUser, 
+    editUserByEmail, 
+    getUserByEmail, 
+    upgradeUserToChirpyRed 
+} from "../db/queries/users.js";
+import { 
+    ensureResourceCreated, 
+    getAuthenticatedUserId, 
+    respondWithJSON, 
+    validateRequiredFields 
+} from "../utils.js";
+import { 
+    BadRequestError, 
+    NotFoundError, 
+    UserNotAuthenticatedError 
+} from "./types/class_errors.js";
 import { 
     checkPasswordHash, 
     hashPassword, 
@@ -11,14 +27,18 @@ import {
     MakeJWTPayload,
     makeRefreshToken
 } from "../auth.js";
-import { config } from "../config.js";
-import { saveRefreshToken } from "../db/queries/tokens.js";
 
 export type UserResponse = Omit<UserCreated, "hashedPassword">;
 type userRequest = {
         password: string;
         email: string;
     };
+export type PolkaWebhook = {
+    event: "user.upgraded";
+    data: {
+        userId: string;
+    };
+};     
 
 export async function handlerUsersCreate(req: Request, res: Response) {
     type createUserParams = {
@@ -44,6 +64,7 @@ export async function handlerUsersCreate(req: Request, res: Response) {
         email: userCreated.email,
         createdAt: userCreated.createdAt,
         updatedAt: userCreated.updatedAt,
+        isChirpyRed: userCreated.isChirpyRed
     } satisfies UserResponse; 
     respondWithJSON(res, 201, payload)
 }
@@ -87,7 +108,8 @@ export async function handlerUserLogin(req: Request, res: Response) {
         createdAt: userFromDb.createdAt,
         updatedAt: userFromDb.updatedAt,
         token: jwtToken,
-        refreshToken: refreshToken.token
+        refreshToken: refreshToken.token,
+        isChirpyRed: userFromDb.isChirpyRed
     }; 
     respondWithJSON(res, 200, payload);
 }
@@ -106,7 +128,26 @@ export async function handlerUserUpdate(req: Request, res: Response) {
         email: userUpdated.email,
         createdAt: userUpdated.createdAt,
         updatedAt: userUpdated.updatedAt,
+        isChirpyRed: userUpdated.isChirpyRed
     } satisfies UserResponse; 
 
     respondWithJSON(res, 200, payload)
+};
+
+export async function handlerMakeUserChirpyRed(req: Request, res: Response) {
+  const parameters: PolkaWebhook = req.body;
+
+  if (parameters.event !== "user.upgraded") {
+    respondWithJSON(res, 204);
+    return
+  };
+  validateRequiredFields({userId: parameters.data?.userId});
+
+  const userUpdated = upgradeUserToChirpyRed(parameters.data.userId);
+  
+  if (!userUpdated) {
+    throw new NotFoundError("Could not upgrade the user to chirp red")
+  };
+
+  respondWithJSON(res, 204);
 };

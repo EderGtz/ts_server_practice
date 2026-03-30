@@ -20,8 +20,9 @@ export async function getUserByEmail(email: string) {
   return result
 }
 
-export async function editUserByEmail(userId:string, hashedPassword: string, email: string) {
-  const [result] = await db.update(users)
+export async function editUserByEmail(userId: string, hashedPassword: string, email: string) {
+  const [result] = await db
+  .update(users)
   .set({ 
     email: email,
     hashedPassword: hashedPassword 
@@ -30,3 +31,14 @@ export async function editUserByEmail(userId:string, hashedPassword: string, ema
   .returning()
   return result satisfies UserCreated;
 };
+
+export async function upgradeUserToChirpyRed(userId: string) {
+  const [result] = await db
+  .update(users)
+  .set({
+    isChirpyRed: true
+  })
+  .where(eq(users.id, userId))
+  .returning()
+  return result
+}
