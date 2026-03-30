@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { checkPasswordHash, hashPassword, makeJWT, MakeJWTPayload, validateJWT } from "./auth";
 import { BadRequestError, UserNotAuthenticatedError } from "./api/types/class_errors";
-import { extractBearerToken } from "./utils";
+import { extractAuthToken } from "./utils";
 
 describe("Password Hashing", () => {
   const password1 = "correctPassword123!";
@@ -79,28 +79,28 @@ describe("Extract bearer token from headers", () => {
   it("Should extract the token from a valid header", () => {
     const token = "secretToken";
     const header = `Bearer ${token}`;
-    expect(extractBearerToken(header)).toBe(token);
+    expect(extractAuthToken(header, "Bearer")).toBe(token);
   });
 
   it("should extract the token even if there are extra parts", () => {
     const token = "mySecretToken";
     const header = `Bearer ${token} extra-data`;
-    expect(extractBearerToken(header)).toBe(token);
+    expect(extractAuthToken(header, "Bearer")).toBe(token);
   });
 
-  it("should throw a BadRequestError if the header does not contain at least two parts", () => {
+  it("should throw a UserNotAuthenticatedError if the header does not contain at least two parts", () => {
     const header = "Bearer";
-    expect(() => extractBearerToken(header)).toThrow(BadRequestError);
+    expect(() => extractAuthToken(header, "Bearer")).toThrow(UserNotAuthenticatedError);
   });
 
-  it('should throw a BadRequestError if the header does not start with "Bearer"', () => {
+  it('should throw a UserNotAuthenticatedError if the header does not start with "Bearer"', () => {
     const header = "Basic mySecretToken";
-    expect(() => extractBearerToken(header)).toThrow(BadRequestError);
+    expect(() => extractAuthToken(header, "Bearer")).toThrow(UserNotAuthenticatedError);
   });
 
-  it("should throw a BadRequestError if the header is an empty string", () => {
+  it("should throw a UserNotAuthenticatedError if the header is an empty string", () => {
     const header = "";
-    expect(() => extractBearerToken(header)).toThrow(BadRequestError);
+    expect(() => extractAuthToken(header, "Bearer")).toThrow(UserNotAuthenticatedError);
   });
 
 });

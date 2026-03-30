@@ -11,6 +11,7 @@ import {
 } from "../db/queries/users.js";
 import { 
     ensureResourceCreated, 
+    getAPIKey, 
     getAuthenticatedUserId, 
     respondWithJSON, 
     validateRequiredFields 
@@ -18,6 +19,7 @@ import {
 import { 
     BadRequestError, 
     NotFoundError, 
+    UnauthorizedError, 
     UserNotAuthenticatedError 
 } from "./types/class_errors.js";
 import { 
@@ -137,6 +139,11 @@ export async function handlerUserUpdate(req: Request, res: Response) {
 export async function handlerMakeUserChirpyRed(req: Request, res: Response) {
   const parameters: PolkaWebhook = req.body;
 
+  const apiKeyRequest = getAPIKey(req);
+  if (apiKeyRequest !== config.api.polkaApiKey) {
+    throw new UnauthorizedError("API key provided is not correct")
+  };
+
   if (parameters.event !== "user.upgraded") {
     respondWithJSON(res, 204);
     return
@@ -144,7 +151,6 @@ export async function handlerMakeUserChirpyRed(req: Request, res: Response) {
   validateRequiredFields({userId: parameters.data?.userId});
 
   const userUpdated = upgradeUserToChirpyRed(parameters.data.userId);
-  
   if (!userUpdated) {
     throw new NotFoundError("Could not upgrade the user to chirp red")
   };

@@ -24,12 +24,20 @@ export function getBearerToken(req: Request): string {
     if (!tokenHeader) {
         throw new UserNotAuthenticatedError("Malformed authorization header");
     };
-    return extractBearerToken(tokenHeader);
+    return extractAuthToken(tokenHeader, "Bearer");
 };
 
-export function extractBearerToken(header: string) {
+export function getAPIKey(req: Request) {
+    const apiTokenHeader = req.get("Authorization");
+    if (!apiTokenHeader) {
+        throw new UserNotAuthenticatedError("Malformed authorization header");
+    };
+    return extractAuthToken(apiTokenHeader, "ApiKey")
+};
+
+export function extractAuthToken(header: string, tokenString: string) {
     const splitHeader = header.split(" ");
-    if (splitHeader.length < 2 || splitHeader[0] !== "Bearer") {
+    if (splitHeader.length < 2 || splitHeader[0] !== tokenString) {
         throw new UserNotAuthenticatedError("Malformed authorization header");
     };
     return splitHeader[1];

@@ -1,0 +1,51 @@
+### Reset all stored values in db
+POST {{baseUrl}}/admin/reset
+
+### Create a new user
+# @name userCreated
+POST {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Try to call polka webhook without api key header
+POST {{baseUrl}}/api/polka/webhooks
+
+{
+  "data": {
+    "userId": "{{userCreated.response.body.id}}"
+  },
+  "event": "user.upgraded"
+}
+
+### Try to call polka webhook with bad request body
+POST {{baseUrl}}/api/polka/webhooks
+Authorization: ApiKey {{polkaApiKey}}
+
+{
+  "data": {
+    "userId": "${userID}"
+  },
+  "event": "user.payment_failed"
+}
+
+### Successfully update the user isChirpyRed value
+POST {{baseUrl}}/api/polka/webhooks
+Authorization: ApiKey {{polkaApiKey}}
+
+{
+  "data": {
+    "userId": "{{userCreated.response.body.id}}"
+  },
+  "event": "user.upgraded"
+}
+
+### Login to see the update
+POST {{baseUrl}}/api/login
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}

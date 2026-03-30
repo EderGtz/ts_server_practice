@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { UserNotAuthenticatedError } from "./types/class_errors.js";
-import { extractBearerToken, getBearerToken, respondWithJSON } from "../utils.js";
+import { extractAuthToken, getBearerToken, respondWithJSON } from "../utils.js";
 import { getUserForRefreshToken, revokeRefreshToken } from "../db/queries/tokens.js";
 import { makeJWT, MakeJWTPayload } from "../auth.js";
 import { config } from "../config.js";
@@ -25,7 +25,7 @@ export async function handlerRevokeRefreshToken(req: Request, res: Response) {
     if (!tokenHeader) {
         throw new UserNotAuthenticatedError("Malformed authorization header");
     };
-    const tokenExtracted = extractBearerToken(tokenHeader);
+    const tokenExtracted = extractAuthToken(tokenHeader, "Bearer");
     await revokeRefreshToken(tokenExtracted);
     respondWithJSON(res, 204)
 };

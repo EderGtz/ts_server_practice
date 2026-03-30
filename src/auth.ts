@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
 import { UserNotAuthenticatedError } from "./api/types/class_errors.js";
 import { randomBytes } from "node:crypto";
+import { Request } from "express";
 
 const TOKEN_ISSUER = "chirpy";
 type Payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
