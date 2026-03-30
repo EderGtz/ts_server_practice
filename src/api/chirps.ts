@@ -66,7 +66,10 @@ export async function handlerDeleteChirp(req: Request, res: Response) {
     throw new UserForbiddenError("Given user is not the author of the chirp");
   };
 
-  await deleteSingleChirp(chirpId)
+  const deleted = await deleteSingleChirp(chirpId);
+  if (!deleted) {
+    throw new Error(`Failed to delete chirp with chirpId: ${chirpId}`);
+  }
 
   respondWithJSON(res, 204)
 };
