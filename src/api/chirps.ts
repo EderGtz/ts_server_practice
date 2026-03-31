@@ -1,20 +1,35 @@
 import type { Request, Response } from "express";
 
 import { InternalServerError, NotFoundError, UserForbiddenError } from "./types/class_errors.js";
-import { createChirp, deleteSingleChirp, getAllChirps, getSingleChirp } from "../db/queries/chirps.js";
+import { createChirp, deleteSingleChirp, getAllChirps, getChirpsByAuthor, getSingleChirp } from "../db/queries/chirps.js";
 import { 
   getAuthenticatedUserId, 
   respondWithJSON, 
   validateChirp, 
   validateRequiredFields 
 } from "../utils.js";
+import { ChirpCreated } from "src/db/schema.js";
 
 interface params {
   body: string;
 }
 
 export async function handlerGetChirps(req: Request, res: Response) {
-  respondWithJSON(res, 200, await getAllChirps())
+  
+  let chirpsToReturn; 
+  let authorId = "";
+  let authorIdQuery = req.query.authorId;
+  if (typeof authorIdQuery === "string") {
+    authorId = authorIdQuery;
+  };
+
+  if (authorId) {
+    chirpsToReturn = await getChirpsByAuthor(authorId);
+  } else {
+    chirpsToReturn = await getAllChirps()
+  };
+
+  respondWithJSON(res, 200, chirpsToReturn)
 };
 
 export async function handlerGetSingleChirp(req: Request, res: Response, chirpId: string[]) {

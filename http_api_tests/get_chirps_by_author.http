@@ -1,0 +1,68 @@
+### Reset all stored values in db
+POST {{baseUrl}}/admin/reset
+
+### Create a new user
+POST {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Login as user to get jwt
+# @name user1
+POST {{baseUrl}}/api/login
+
+{
+  "email": "{{emailExample1}}",
+  "password": "{{passwordExample1}}"
+}
+
+### Create a second user
+POST {{baseUrl}}/api/users
+
+{
+  "email": "{{emailExample2}}",
+  "password": "{{passwordExample2}}"
+}
+
+### Login as second user to get jwt
+# @name user2
+POST {{baseUrl}}/api/login
+
+{
+  "email": "{{emailExample2}}",
+  "password": "{{passwordExample2}}"
+}
+
+
+
+### Post a new chirp as first user
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{user1.response.body.token}}
+
+{
+  "body": "I'm the one who knocks!"
+}
+
+### Post a new chirp as first user
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{user1.response.body.token}}
+
+{
+  "body": "Gale!"
+}
+
+### Post a chirp as second user
+POST {{baseUrl}}/api/chirps
+Authorization: Bearer {{user2.response.body.token}}
+
+{
+  "body": "Mr President...."
+}
+
+### Get chirps from user 1
+GET {{baseUrl}}/api/chirps?authorId={{user1.response.body.id}}
+
+### Get chirps from user 2
+GET {{baseUrl}}/api/chirps?authorId={{user2.response.body.id}}
