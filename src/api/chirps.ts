@@ -18,6 +18,7 @@ export async function handlerGetChirps(req: Request, res: Response) {
   
   let chirpsToReturn; 
   let authorId = "";
+  let sortOrder = req.query.sort;
   let authorIdQuery = req.query.authorId;
   if (typeof authorIdQuery === "string") {
     authorId = authorIdQuery;
@@ -25,8 +26,10 @@ export async function handlerGetChirps(req: Request, res: Response) {
 
   if (authorId) {
     chirpsToReturn = await getChirpsByAuthor(authorId);
+  } else if (typeof sortOrder === "string") {
+    chirpsToReturn = await getAllChirps(sortOrder);
   } else {
-    chirpsToReturn = await getAllChirps()
+    chirpsToReturn = await getAllChirps();
   };
 
   respondWithJSON(res, 200, chirpsToReturn)

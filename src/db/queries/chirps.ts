@@ -1,6 +1,6 @@
 import { db } from "../index.js";
 import { ChirpCreated, chirps, NewChirp } from "../schema.js";
-import { asc, eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 
 export async function createChirp(chirp: NewChirp): Promise<ChirpCreated> {
   const [result] = await db
@@ -11,7 +11,14 @@ export async function createChirp(chirp: NewChirp): Promise<ChirpCreated> {
    return result
 };
 
-export async function getAllChirps(): Promise<ChirpCreated[]> {
+export async function getAllChirps(sortOrder?: string): Promise<ChirpCreated[]> {
+  if (sortOrder === "desc") {
+      return await db
+        .select()
+        .from(chirps)
+        .orderBy(desc(chirps.createdAt));
+  };
+
   return await db
   .select()
   .from(chirps)
