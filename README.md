@@ -1,4 +1,4 @@
-# ts_server
+# TypeScript server: practice project at **Boot.dev**
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
