@@ -4,6 +4,10 @@ import { NewRefreshToken, refreshTokens, users } from "../schema.js";
 import { NotFoundError } from "../../api/types/class_errors.js";
 
 
+/**
+ * Stores a refresh token linked to a user.
+ * The created token row is returned for the login response.
+ */
 export async function saveRefreshToken(newRefreshToken: NewRefreshToken) {
     const [result] = await db
       .insert(refreshTokens)
@@ -13,6 +17,10 @@ export async function saveRefreshToken(newRefreshToken: NewRefreshToken) {
     return result
 };
 
+/**
+ * Resolves the user behind a refresh token when it is still valid.
+ * Revoked or expired tokens are filtered out at query time.
+ */
 export async function getUserForRefreshToken(token: string) {
   const [result] = await db
   .select({ user: users})
@@ -30,6 +38,10 @@ export async function getUserForRefreshToken(token: string) {
   return result
 };
 
+/**
+ * Marks a refresh token as revoked.
+ * A missing token becomes a not-found error for the caller.
+ */
 export async function revokeRefreshToken(refreshTokenToRevoke: string) {
   const tokenModified = await db
   .update(refreshTokens)

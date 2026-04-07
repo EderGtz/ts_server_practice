@@ -8,12 +8,15 @@ import {
   validateChirp, 
   validateRequiredFields 
 } from "../utils.js";
-import { ChirpCreated } from "src/db/schema.js";
 
 interface params {
   body: string;
 }
 
+/**
+ * Returns the chirp feed, optionally filtered by author or sort order.
+ * Query params control whether the full feed or one author's chirps are returned.
+ */
 export async function handlerGetChirps(req: Request, res: Response) {
   
   let chirpsToReturn; 
@@ -35,6 +38,10 @@ export async function handlerGetChirps(req: Request, res: Response) {
   respondWithJSON(res, 200, chirpsToReturn)
 };
 
+/**
+ * Looks up a single chirp by id.
+ * A missing chirp is converted into a 404 response.
+ */
 export async function handlerGetSingleChirp(req: Request, res: Response, chirpId: string[]) {
 
   const chirp = await getSingleChirp(chirpId[0])
@@ -45,6 +52,10 @@ export async function handlerGetSingleChirp(req: Request, res: Response, chirpId
   respondWithJSON(res, 200, chirp);
 };
 
+/**
+ * Creates a chirp for the authenticated user.
+ * The body is validated and sanitized before insertion.
+ */
 export async function handlerCreateChirp(req: Request, res: Response) {
   const parameters: params = req.body
   validateRequiredFields({ body: parameters.body });
@@ -71,6 +82,10 @@ export async function handlerCreateChirp(req: Request, res: Response) {
   respondWithJSON(res, 201, payload)
 };
 
+/**
+ * Deletes a chirp only if the caller owns it.
+ * This protects chirps from being removed by other users.
+ */
 export async function handlerDeleteChirp(req: Request, res: Response) {
   const chirpId = req.params.chirpId as string;
   const userId = getAuthenticatedUserId(req);

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { checkPasswordHash, hashPassword, makeJWT, MakeJWTPayload, validateJWT } from "./auth";
-import { BadRequestError, UserNotAuthenticatedError } from "./api/types/class_errors";
-import { extractAuthToken } from "./utils";
+import { checkPasswordHash, hashPassword, makeJWT, MakeJWTPayload, validateJWT } from "./auth.js";
+import { BadRequestError, UserNotAuthenticatedError } from "./api/types/class_errors.js";
+import { extractAuthToken } from "./utils.js";
 
 describe("Password Hashing", () => {
   const password1 = "correctPassword123!";

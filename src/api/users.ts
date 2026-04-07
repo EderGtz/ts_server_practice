@@ -42,6 +42,10 @@ export type PolkaWebhook = {
     };
 };     
 
+/**
+ * Creates a new user with a hashed password.
+ * The response omits sensitive credential fields.
+ */
 export async function handlerUsersCreate(req: Request, res: Response) {
     type createUserParams = {
         email: string;
@@ -71,6 +75,10 @@ export async function handlerUsersCreate(req: Request, res: Response) {
     respondWithJSON(res, 201, payload)
 }
 
+/**
+ * Authenticates a user and returns session tokens.
+ * Successful logins receive both a JWT and a refresh token.
+ */
 export async function handlerUserLogin(req: Request, res: Response) {
 
     const parameters: userRequest = req.body;
@@ -116,6 +124,10 @@ export async function handlerUserLogin(req: Request, res: Response) {
     respondWithJSON(res, 200, payload);
 }
 
+/**
+ * Updates the authenticated user's email and password.
+ * The password is re-hashed before the record is saved.
+ */
 export async function handlerUserUpdate(req: Request, res: Response) {
     const parameters: userRequest = req.body;
     validateRequiredFields(parameters);
@@ -136,6 +148,10 @@ export async function handlerUserUpdate(req: Request, res: Response) {
     respondWithJSON(res, 200, payload)
 };
 
+/**
+ * Handles the Polka webhook that upgrades a user to Chirpy Red.
+ * Requests must include the configured API key to succeed.
+ */
 export async function handlerMakeUserChirpyRed(req: Request, res: Response) {
   const parameters: PolkaWebhook = req.body;
 

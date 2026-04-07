@@ -3,6 +3,10 @@ import {NextFunction, Request, Response } from "express";
 import { respondWithError } from "../utils.js";
 import { AppError } from "./types/class_errors.js";
 
+/**
+ * Centralizes Express error responses for the API.
+ * Known app errors keep their status code, and unknown ones become 500s.
+ */
 export async function errorHandler(
   err: Error,
   _: Request,

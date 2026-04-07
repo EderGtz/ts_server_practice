@@ -5,6 +5,10 @@ import { getUserForRefreshToken, revokeRefreshToken } from "../db/queries/tokens
 import { makeJWT, MakeJWTPayload } from "../auth.js";
 import { config } from "../config.js";
 
+/**
+ * Exchanges a valid refresh token for a new access token.
+ * The refresh token itself stays unchanged until it is revoked or expires.
+ */
 export async function handlerRefreshToken(req: Request, res: Response) {
     const tokenExtracted = getBearerToken(req);
     const userForRefreshToken = await getUserForRefreshToken(tokenExtracted);
@@ -20,6 +24,10 @@ export async function handlerRefreshToken(req: Request, res: Response) {
     respondWithJSON(res, 200, { token: newJwtToken });
 };
 
+/**
+ * Revokes an existing refresh token.
+ * After this, the token can no longer mint new access tokens.
+ */
 export async function handlerRevokeRefreshToken(req: Request, res: Response) {
     const tokenHeader = req.get("Authorization");
     if (!tokenHeader) {

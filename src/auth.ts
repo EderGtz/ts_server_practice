@@ -19,15 +19,26 @@ export type MakeJWTPayload = {
  * exp - time the token expires
  */
 
+/**
+ * Hashes a plain-text password with Argon2.
+ * This is used before storing credentials in the database.
+ */
 export async function hashPassword(password: string): Promise<string> {
     return await hash(password)
 }
 
+/**
+ * Compares a plain-text password against a stored Argon2 hash.
+ * Returns true only when the password matches the saved hash.
+ */
 export async function checkPasswordHash(password: string, hash: string): Promise <boolean> {
     return await verify(hash, password)
 }
 
-
+/**
+ * Builds a signed JWT for a user session.
+ * The token includes issuer, subject, issued-at, and expiration claims.
+ */
 export function makeJWT(payload: MakeJWTPayload): string {
 
     const createdAtSeconds = Math.floor(Date.now() / 1000);
@@ -43,7 +54,8 @@ export function makeJWT(payload: MakeJWTPayload): string {
 }
 
 /**
- * Returns user ID stored in the JWT token given if exist
+ * Validates a JWT and returns the authenticated user id.
+ * It rejects expired, malformed, or foreign-issued tokens.
  */
 export function validateJWT(
     tokenString: string, 
@@ -68,7 +80,8 @@ export function validateJWT(
 }
 
 /**
- * Generate a random 256-bit (32-byte) hex-encoded string
+ * Generates a random refresh token string.
+ * The token is 32 bytes of entropy encoded as hexadecimal.
  */
 export function makeRefreshToken(): string {
     return randomBytes(32).toString('hex')

@@ -4,7 +4,10 @@ import { deleteAllUsers } from "../db/queries/users.js";
 import { UserForbiddenError } from "./types/class_errors.js";
 import { deleteAllChirps } from "../db/queries/chirps.js";
 
-
+/**
+ * Clears local app state for development workflows.
+ * This resets metrics and deletes stored users and chirps in `dev`.
+ */
 export async function handlerReset(req: Request, res: Response) {
     if (config.api.platform !== "dev") {
         console.log(config.api.platform);

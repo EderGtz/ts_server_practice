@@ -4,10 +4,18 @@ import { BadRequestError, InternalServerError, UserNotAuthenticatedError } from 
 import { validateJWT } from "./auth.js";
 import { config } from "./config.js";
 
+/**
+ * Sends a JSON error response with a consistent `{ error }` shape.
+ * This keeps error payloads uniform across the API.
+ */
 export async function respondWithError(res: Response, errorCode: number, errorMsg: string) {
     respondWithJSON(res, errorCode, { error: errorMsg })
 }
 
+/**
+ * Serializes a payload as JSON and writes it to the response.
+ * All successful handlers use this helper for consistent output.
+ */
 export async function respondWithJSON(res: Response, code: number, payload?: any) {
     res.header("Content-Type", "application/json");
     const body = JSON.stringify(payload);
@@ -27,6 +35,10 @@ export function getBearerToken(req: Request): string {
     return extractAuthToken(tokenHeader, "Bearer");
 };
 
+/**
+ * Reads an API key from the Authorization header.
+ * The expected format is `ApiKey <token>`.
+ */
 export function getAPIKey(req: Request) {
     const apiTokenHeader = req.get("Authorization");
     if (!apiTokenHeader) {
@@ -35,6 +47,10 @@ export function getAPIKey(req: Request) {
     return extractAuthToken(apiTokenHeader, "ApiKey")
 };
 
+/**
+ * Extracts the token value from an authorization header.
+ * It also validates the expected auth scheme prefix.
+ */
 export function extractAuthToken(header: string, tokenString: string) {
     const splitHeader = header.split(" ");
     if (splitHeader.length < 2 || splitHeader[0] !== tokenString) {
@@ -43,10 +59,18 @@ export function extractAuthToken(header: string, tokenString: string) {
     return splitHeader[1];
 };
 
+/**
+ * Resolves the current user id from a bearer token.
+ * This is the shared auth gate for protected endpoints.
+ */
 export function getAuthenticatedUserId(req: Request): string {
     return validateJWT(getBearerToken(req), config.jwt.secret)
 };
 
+/**
+ * Ensures a request body includes every required field.
+ * Missing or null values are rejected as bad requests.
+ */
 export function validateRequiredFields(fields: Record<string, unknown>) {
     const hasMissingField = Object.values(fields).some(
         (value) => value === undefined || value === null
@@ -56,6 +80,10 @@ export function validateRequiredFields(fields: Record<string, unknown>) {
     };
 };
 
+/**
+ * Guarantees a created resource exists before continuing.
+ * If a write returned nothing, this converts it into a server error.
+ */
 export function ensureResourceCreated<T>(
     resource: T | undefined,
     message: string
@@ -69,6 +97,10 @@ export function ensureResourceCreated<T>(
 
 const notAdmitedWords = ["kerfuffle", "sharbert", "fornax"]
 
+/**
+ * Validates chirp length and replaces banned words.
+ * The sanitized chirp is returned for storage and response payloads.
+ */
 export function validateChirp(chirpString: string) {
   const maxChirpLength = 140;
   if (chirpString.length > maxChirpLength) {
